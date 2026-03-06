@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZeroWaste AI - Buyer & Assistant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <main class="main-content" style="padding: 20px;">
+        <header class="header">
+            <h2>🌍 ZeroWaste AI - Consumer Portal</h2>
+            <div style="display:flex; gap: 15px; align-items: center;">
+                <div id="liveClock" style="font-size: 1.1rem; color: var(--accent-green);"></div>
+                <a href="index.html" style="color:var(--text-muted); font-size: 0.9rem; text-decoration: none;">Admin
+                    Dashboard</a>
+            </div>
+        </header>
+
+        <div class="buyer-layout">
+            <!-- Left: Available Food Items -->
+            <div class="glass-card food-list">
+                <h3 style="margin-bottom: 20px;">Available Discounted Food Nearby</h3>
+                <div id="buyerFoodList" style="display: flex; flex-direction: column; gap: 15px;">
+                    <!-- Rendered by JS -->
+                </div>
+            </div>
+
+            <!-- Right: AI Shopping Assistant -->
+            <div class="glass-card ai-panel">
+                <h3 style="margin-bottom: 20px;">🤖 ZeroWaste AI Assistant</h3>
+                <div class="chat-box" id="chatBox">
+                    <div class="chat-msg msg-ai">Hello! I am your ZeroWaste AI assistant. I can help you find discounted
+                        food, place an order, or answer any questions about our sustainability mission. How can I help
+                        you today?</div>
+                </div>
+                <div class="chat-input" id="chatForm">
+                    <input type="text" id="chatInput" placeholder="Ask AI to buy food or query items..."
+                        autocomplete="off">
+                    <button class="btn btn-blue" id="btnSend">Send</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="database.js"></script>
+    <script>
+        // Buyer UI specific logic
+        const chatBox = document.getElementById('chatBox');
+        const chatInput = document.getElementById('chatInput');
+        const btnSend = document.getElementById('btnSend');
+        const buyerFoodList = document.getElementById('buyerFoodList');
+
+        function appendMessage(msg, isAi) {
+            const div = document.createElement('div');
+            div.className = `chat-msg ${isAi ? 'msg-ai' : 'msg-user'}`;
+            div.innerHTML = msg;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function renderBuyerFoods() {
+            buyerFoodList.innerHTML = '';
+            const availableFoods = db.getAvailableFoods();
+
+            if (availableFoods.length === 0) {
+                buyerFoodList.innerHTML = '<p style="color:var(--text-muted)">No discounted food available right now. Check back later!</p>';
+                return;
+            }
+
+            availableFoods.forEach(food => {
+                const discountPrice = (food.originalPrice * 0.7).toFixed(2);
+                const card = document.createElement('div');
+                card.style.cssText = `padding: 15px; background: rgba(0,0,0,0.2); border-radius: 10px; border: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center;`;
+                card.innerHTML = `
+                    <div>
+                        <h4 style="color: var(--accent-green);">${food.name}</h4>
+                        <div style="font-size: 0.9rem; color: var(--text-muted); margin-top: 5px;">
+                            ${food.quantity} plates left • Available until ${food.expiry}
+                        </div>
+                        <div style="font-size: 1.1rem; margin-top: 5px;">
+                            <span style="text-decoration: line-through; color: var(--text-muted); font-size: 0.9rem;">$${food.originalPrice}</span>
+                            <span style="font-weight: 600; color: var(--text-main); margin-left: 10px;">$${discountPrice}</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-orange" onclick="buyItem(${food.id}, '${food.name}')">Buy Now</button>
+                `;
+                buyerFoodList.appendChild(card);
+            });
+        }
+
+        window.buyItem = function (id, name) {
+            db.updateFoodStatus(id, 'Sold');
+            appendMessage(`You successfully purchased <b>${name}</b>! Thank you for reducing food waste. 🌍`, true);
+            renderBuyerFoods();
+        }
+
+        function handleAIChat() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+
+            appendMessage(text, false);
+            chatInput.value = '';
+
+            // Simulated AI Logic
+            setTimeout(() => {
+                const lower = text.toLowerCase();
+                const availableFoods = db.getAvailableFoods();
+
+                if (lower.includes('buy') || lower.includes('order')) {
+                    // Try to match a food name dynamically
+                    const matchedFood = availableFoods.find(f => lower.includes(f.name.toLowerCase()));
+                    if (matchedFood) {
+                        buyItem(matchedFood.id, matchedFood.name);
+                    } else if (availableFoods.length > 0) {
+                        appendMessage(`I see you want to order. We currently have ${availableFoods.map(f => f.name).join(', ')}. Please click 'Buy Now' or tell me specifically what you want!`, true);
+                    } else {
+                        appendMessage(`I'm sorry, we don't have any available food to order right now.`, true);
+                    }
+                }
+                else if (lower.includes('what') && (lower.includes('available') || lower.includes('food') || lower.includes('menu'))) {
+                    if (availableFoods.length > 0) {
+                        let msg = "Here is what's available today at a 30% discount:<br><br>";
+                        availableFoods.forEach(f => {
+                            msg += `• <b>${f.name}</b> - Only $${(f.originalPrice * 0.7).toFixed(2)} (${f.quantity} plates)<br>`;
+                        });
+                        appendMessage(msg, true);
+                    } else {
+                        appendMessage("We are currently sold out of all surplus food. Great job reducing waste!", true);
+                    }
+                }
+                else if (lower.includes('impact') || lower.includes('environment')) {
+                    const metrics = db.getMetrics();
+                    appendMessage(`So far, our community has saved <b>${metrics.foodSavedKg.toFixed(1)}kg</b> of food and prevented <b>${metrics.co2Saved.toFixed(1)}kg</b> of CO₂ emissions!`, true);
+                }
+                else {
+                    appendMessage("I'm here to help you reduce food waste! You can ask what's on the menu, tell me to buy an item, or ask about our environmental impact.", true);
+                }
+            }, 800);
+        }
+
+        btnSend.addEventListener('click', handleAIChat);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleAIChat();
+        });
+
+        // Initialize clock
+        setInterval(() => {
+            document.getElementById('liveClock').textContent = new Date().toLocaleTimeString();
+        }, 1000);
+
+        // Listen for database updates from Admin tab
+        window.addEventListener('db_updated', renderBuyerFoods);
+        window.addEventListener('storage', renderBuyerFoods); // across tabs
+
+        renderBuyerFoods();
+    </script>
+</body>
+
+</html>
