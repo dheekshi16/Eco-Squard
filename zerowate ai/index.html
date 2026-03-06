@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZeroWaste AI - Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <nav class="sidebar glass" id="sidebar">
+        <div class="logo-container">
+            <h2><i class="fa-solid fa-leaf"></i> ZeroWaste AI</h2>
+        </div>
+        <div class="nav-item active" data-target="overview" data-i18n="nav_overview">
+            <i class="fa-solid fa-chart-pie"></i> Overview
+        </div>
+        <div class="nav-item" data-target="addFood" data-i18n="nav_add_food">
+            <i class="fa-solid fa-plus-circle"></i> Add Food
+        </div>
+        <div class="nav-item" data-target="ngoDonation" data-i18n="nav_donation">
+            <i class="fa-solid fa-hand-holding-heart"></i> NGO Donation
+        </div>
+        <div class="nav-item" data-target="discountSale" data-i18n="nav_sale">
+            <i class="fa-solid fa-tags"></i> Discount Sale
+        </div>
+        <div class="nav-item" data-target="inventory" data-i18n="nav_inventory">
+            <i class="fa-solid fa-box-open"></i> Inventory
+        </div>
+        <div class="nav-item" data-target="impact" data-i18n="nav_impact">
+            <i class="fa-solid fa-earth-americas"></i> Impact
+        </div>
+        <div class="nav-item" data-target="settings" data-i18n="nav_settings">
+            <i class="fa-solid fa-gear"></i> Settings
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <header class="glass">
+            <div>
+                <h1 class="page-title" id="pageTitle" data-i18n="nav_overview">Overview</h1>
+            </div>
+            <div class="header-controls">
+                <select id="languageSelect" class="glass-select">
+                    <option value="en">English</option>
+                    <option value="ta">தமிழ் (Tamil)</option>
+                    <option value="te">తెలుగు (Telugu)</option>
+                    <option value="hi">हिंदी (Hindi)</option>
+                </select>
+                <div class="header-info">
+                    <div id="restaurantName" style="font-weight:600;">The Grand Kitchen</div>
+                    <div class="time-weather" id="timeWeather">--:-- | Weather: Loading...</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dynamic Output Container -->
+
+        <!-- 1. Overview Dashboard -->
+        <section id="overview" class="dashboard-section active">
+            <div class="cards-grid" id="overviewCards">
+                <!-- Rendered via JS -->
+            </div>
+            <div class="ai-insights glass" id="aiInsightsContainer">
+                <h3 data-i18n="ai_insights"><i class="fa-solid fa-robot"></i> AI Predictions & Insights</h3>
+                <p class="ai-message" id="aiMessage">Analyzing inventory data...</p>
+            </div>
+        </section>
+
+        <!-- 2. Add Food Dashboard -->
+        <section id="addFood" class="dashboard-section">
+            <div class="form-container glass">
+                <h2 style="margin-bottom: 1.5rem;" data-i18n="add_surplus_food">Add Surplus Food</h2>
+                <form id="addFoodForm">
+                    <div class="form-group">
+                        <label data-i18n="food_name">Food Name</label>
+                        <input type="text" id="foodName" required>
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="quantity_plates">Quantity (plates)</label>
+                        <input type="number" id="foodQty" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="food_category">Food Category</label>
+                        <select id="foodCategory" required>
+                            <option value="Main Course" data-i18n="cat_main">Main Course</option>
+                            <option value="Appetizer" data-i18n="cat_appetizer">Appetizer</option>
+                            <option value="Bread" data-i18n="cat_bread">Bread/Rotis</option>
+                            <option value="Dessert" data-i18n="cat_dessert">Dessert</option>
+                            <option value="Curry" data-i18n="cat_curry">Curry</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="time_prepared">Time Prepared</label>
+                        <input type="time" id="prepTime" required>
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="expiry_time">Expiry Time</label>
+                        <input type="time" id="expiryTime" required>
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="original_price">Original Price (₹)</label>
+                        <input type="number" id="originalPrice" required>
+                    </div>
+                    <button type="submit" class="btn btn-green" style="width:100%" data-i18n="btn_add_food">ADD
+                        FOOD</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- 3. NGO Donation Dashboard -->
+        <section id="ngoDonation" class="dashboard-section">
+            <div class="table-container glass">
+                <h2 style="margin-bottom: 1rem;" data-i18n="available_for_donation">Available for Donation</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th data-i18n="food_name">Food Name</th>
+                            <th data-i18n="quantity">Quantity</th>
+                            <th data-i18n="time_prepared">Prepared</th>
+                            <th data-i18n="expiry_time">Expiry</th>
+                            <th data-i18n="action">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="donationTableBody">
+                        <!-- Rendered via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 4. Discount Sale Dashboard -->
+        <section id="discountSale" class="dashboard-section">
+            <div class="table-container glass">
+                <h2 style="margin-bottom: 1rem;" data-i18n="discount_sales">Discount Sales (Delivery Apps)</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th data-i18n="food_name">Food Name</th>
+                            <th data-i18n="quantity">Quantity</th>
+                            <th data-i18n="original_price">Orig. Price</th>
+                            <th data-i18n="discount_price">Discount Price (30% off)</th>
+                            <th data-i18n="status">Status</th>
+                            <th data-i18n="action">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="salesTableBody">
+                        <!-- Rendered via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 5. Inventory Dashboard -->
+        <section id="inventory" class="dashboard-section">
+            <div class="table-container glass">
+                <h2 style="margin-bottom: 1rem;" data-i18n="current_inventory">Current Inventory</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th data-i18n="food_name">Food Name</th>
+                            <th data-i18n="quantity">Quantity</th>
+                            <th data-i18n="food_category">Category</th>
+                            <th data-i18n="expiry_time">Expiry Time</th>
+                            <th data-i18n="status">Status</th>
+                            <th data-i18n="action">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventoryTableBody">
+                        <!-- Rendered via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 6. Impact Dashboard -->
+        <section id="impact" class="dashboard-section">
+            <div class="cards-grid" id="impactCards">
+                <!-- Rendered via JS -->
+            </div>
+        </section>
+
+        <!-- 7. Settings Dashboard -->
+        <section id="settings" class="dashboard-section">
+            <div class="settings-card glass">
+                <h2 style="margin-bottom: 1rem;" data-i18n="nav_settings">Settings</h2>
+                <!-- Time Setting for 24hr auto-refresh -->
+                <div class="form-group">
+                    <label data-i18n="auto_refresh_time">Set Daily Auto-Refresh Time (24hr format)</label>
+                    <p style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 0.5rem;" data-i18n="auto_refresh_desc">
+                        App will automatically refresh metrics and clear expired items at this time.</p>
+                    <input type="time" id="autoRefreshTimeInput" value="00:00">
+                </div>
+                <button id="saveSettingsBtn" class="btn btn-blue" data-i18n="btn_save_settings">Save Settings</button>
+                <div id="settingsMsg" style="margin-top: 1rem; color: #10b981; display: none;"
+                    data-i18n="settings_saved">Settings Saved!</div>
+            </div>
+        </section>
+
+    </main>
+
+    <script src="database.js"></script>
+    <script src="dashboard.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
